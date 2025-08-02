@@ -107,7 +107,7 @@
                     me.gamepad.brake = controller.buttons[6] ? controller.buttons[6].value : 0;
                     
                     // Debug: Log controller inputs
-                    if (Math.abs(me.gamepad.steering) > 0.1 || me.gamepad.throttle > 0.1 || me.gamepad.brake > 0.1) {
+                    if (Math.abs(me.gamepad.steering) > 0.2 || me.gamepad.throttle > 0.2 || me.gamepad.brake > 0.2) {
                         console.log('Controller inputs:', {
                             steering: me.gamepad.steering,
                             throttle: me.gamepad.throttle,
@@ -116,10 +116,10 @@
                     }
                     
                     // Map to keyboard controls for compatibility
-                    var throttleActive = me.gamepad.throttle > 0.05;
-                    var brakeActive = me.gamepad.brake > 0.05;
-                    var leftActive = me.gamepad.steering < -0.05;
-                    var rightActive = me.gamepad.steering > 0.05;
+                    var throttleActive = me.gamepad.throttle > 0.2;  // Increased from 0.05
+                    var brakeActive = me.gamepad.brake > 0.2;        // Increased from 0.05
+                    var leftActive = me.gamepad.steering < -0.2;     // Increased from -0.05
+                    var rightActive = me.gamepad.steering > 0.2;     // Increased from 0.05
                     
                     // Set keyboard state directly
                     me.keys['W'.charCodeAt(0)] = throttleActive;
@@ -142,12 +142,12 @@
                     }
                     
                     // Debug: Show active controls
-                    if (me.gamepad.throttle > 0.05 || me.gamepad.brake > 0.05 || Math.abs(me.gamepad.steering) > 0.05) {
+                    if (me.gamepad.throttle > 0.2 || me.gamepad.brake > 0.2 || Math.abs(me.gamepad.steering) > 0.2) {
                         console.log('Active controls:', {
-                            forward: me.gamepad.throttle > 0.05,
-                            backward: me.gamepad.brake > 0.05,
-                            left: me.gamepad.steering < -0.05,
-                            right: me.gamepad.steering > 0.05,
+                            forward: me.gamepad.throttle > 0.2,
+                            backward: me.gamepad.brake > 0.2,
+                            left: me.gamepad.steering < -0.2,
+                            right: me.gamepad.steering > 0.2,
                             throttle: me.gamepad.throttle,
                             brake: me.gamepad.brake,
                             steering: me.gamepad.steering
