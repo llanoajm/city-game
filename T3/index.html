@@ -108,6 +108,12 @@
     <div id="info" style="position: absolute; top: 0; right: 0;">
         <div class="bottom" id="fullscreen" ></div>
     </div>
+    
+    <!-- Simple Bike Speed Display -->
+    <div id="bike-speed" style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); color: white; padding: 10px; border-radius: 5px; font-family: Arial, sans-serif; font-size: 14px;">
+        <div>Speed: <span id="bike-speed-value">--</span> km/h</div>
+        <div>Status: <span id="bike-status">Disconnected</span></div>
+    </div>
 
     <!-- Library -->
     <script src="../boilerplate_lib/vendor/three.js/three.68.min.js"></script>
@@ -192,6 +198,9 @@
     <!-- Controllers -->
     <script type="text/javascript" src="js/controller/Keyboard.js"></script>
     <script type="text/javascript" src="js/controller/World.js"></script>
+
+    <!-- Simple Speed Display -->
+    <script type="text/javascript" src="js/SimpleSpeedDisplay.js"></script>
 
 	<script type="text/javascript" src="js/Application.js"></script>
 

@@ -83,7 +83,7 @@
          * Max speed of the car
          * @type {number}
          */
-        this.maxSpeed = 150;
+        this.maxSpeed = 100;  // Reduced from 150 to 100
         /**
          * Min speed of the car
          * @type {number}
@@ -456,36 +456,19 @@
         // TILT (calculates the current tilt factor)
         me.tilt();
 
-        // MOVE FORWARD AND BACKWARD
+        // MOVE FORWARD AND BACKWARD (keep original keyboard/gamepad controls)
         if (T3.Keyboard.query('W')) {
             me.move('forward', delta);
-            // update the rotation of the wheels based on the speed of the car
         }
         if (T3.Keyboard.query('S')) {
             me.move('backward', delta);
-        }
-        
-        // Debug: Log car input detection
-        if (T3.Keyboard.query('W') || T3.Keyboard.query('S') || T3.Keyboard.query('A') || T3.Keyboard.query('D')) {
-            console.log('Car detected inputs:', {
-                W: T3.Keyboard.query('W'),
-                S: T3.Keyboard.query('S'),
-                A: T3.Keyboard.query('A'),
-                D: T3.Keyboard.query('D'),
-                speed: me.speed,
-                keysArray: {
-                    W: T3.Keyboard.keys['W'.charCodeAt(0)],
-                    S: T3.Keyboard.keys['S'.charCodeAt(0)],
-                    A: T3.Keyboard.keys['A'.charCodeAt(0)],
-                    D: T3.Keyboard.keys['D'.charCodeAt(0)]
-                }
-            });
         }
 
         // SPEED AND WHEEL ROTATION DECAY
         if ( !T3.Keyboard.query('W') && !T3.Keyboard.query('S') ) {
             me.move('decay', delta);
         }
+        
         if ( !T3.Keyboard.query('A') && !T3.Keyboard.query('D') ) {
             me.wheelFrontLeft.decay();
             me.wheelFrontRight.decay();

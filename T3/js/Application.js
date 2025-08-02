@@ -258,6 +258,9 @@ T3.Application = {
         // inits the world controller
         this.initController();
 
+        // Initialize simple speed display
+        T3.SimpleSpeedDisplay.init();
+
         $('#loader').fadeOut(3000);
 
         // animate the world and the scene

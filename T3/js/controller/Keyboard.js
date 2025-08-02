@@ -84,13 +84,11 @@
                     console.log('Gamepad detected:', controller);
                     me.gamepad.connected = true;
                     me.gamepad.controller = controller;
-                    me.showControllerStatus('PlayStation Controller Connected!', true);
                 } else if (!controller && me.gamepad.connected) {
                     // Controller disconnected
                     console.log('Gamepad disconnected');
                     me.gamepad.connected = false;
                     me.gamepad.controller = null;
-                    me.showControllerStatus('PlayStation Controller Disconnected!', false);
                 }
                 
                 if (me.gamepad.connected && controller) {
@@ -99,65 +97,45 @@
                     
                     // PS5 Controller mappings:
                     // Left stick X-axis (0) for steering
-                    // R2 trigger (7) for acceleration  
+                    // Right stick X-axis (2) for camera horizontal
+                    // Right stick Y-axis (3) for camera vertical
+                    // R2 trigger (7) for acceleration
                     // L2 trigger (6) for braking
                     
                     me.gamepad.steering = controller.axes[0] || 0;
+                    me.gamepad.cameraHorizontal = controller.axes[2] || 0;
+                    me.gamepad.cameraVertical = controller.axes[3] || 0;
                     me.gamepad.throttle = controller.buttons[7] ? controller.buttons[7].value : 0;
                     me.gamepad.brake = controller.buttons[6] ? controller.buttons[6].value : 0;
                     
                     // Debug: Log controller inputs
-                    if (Math.abs(me.gamepad.steering) > 0.2 || me.gamepad.throttle > 0.2 || me.gamepad.brake > 0.2) {
-                        console.log('Controller inputs:', {
-                            steering: me.gamepad.steering,
-                            throttle: me.gamepad.throttle,
-                            brake: me.gamepad.brake
-                        });
-                    }
+                    // Removed for production
                     
                     // Map to keyboard controls for compatibility
-                    var throttleActive = me.gamepad.throttle > 0.2;  // Increased from 0.05
-                    var brakeActive = me.gamepad.brake > 0.2;        // Increased from 0.05
-                    var leftActive = me.gamepad.steering < -0.2;     // Increased from -0.05
-                    var rightActive = me.gamepad.steering > 0.2;     // Increased from 0.05
+                    var throttleActive = me.gamepad.throttle > 0.2;      // R2 for throttle
+                    var brakeActive = me.gamepad.brake > 0.2;            // L2 for brake
+                    var leftActive = me.gamepad.steering < -0.4;         // Left stick for steering - increased threshold
+                    var rightActive = me.gamepad.steering > 0.4;         // Left stick for steering - increased threshold
+                    var cameraUpActive = me.gamepad.cameraVertical > 0.2;    // Right stick Y-axis for camera up
+                    var cameraDownActive = me.gamepad.cameraVertical < -0.2;  // Right stick Y-axis for camera down
+                    var cameraLeftActive = me.gamepad.cameraHorizontal < -0.2; // Right stick X-axis for camera left
+                    var cameraRightActive = me.gamepad.cameraHorizontal > 0.2; // Right stick X-axis for camera right
                     
                     // Set keyboard state directly
                     me.keys['W'.charCodeAt(0)] = throttleActive;
                     me.keys['S'.charCodeAt(0)] = brakeActive;
                     me.keys['A'.charCodeAt(0)] = leftActive;
                     me.keys['D'.charCodeAt(0)] = rightActive;
+                    me.keys['Q'.charCodeAt(0)] = cameraUpActive;     // Q for camera up
+                    me.keys['E'.charCodeAt(0)] = cameraDownActive;   // E for camera down
+                    me.keys['Z'.charCodeAt(0)] = cameraLeftActive;   // Z for camera left
+                    me.keys['C'.charCodeAt(0)] = cameraRightActive;  // C for camera right
                     
                     // Debug: Check if keyboard state is being set correctly
-                    if (throttleActive || brakeActive || leftActive || rightActive) {
-                        console.log('Keyboard state set:', {
-                            W: me.query('W'),
-                            S: me.query('S'),
-                            A: me.query('A'),
-                            D: me.query('D'),
-                            throttleActive: throttleActive,
-                            brakeActive: brakeActive,
-                            leftActive: leftActive,
-                            rightActive: rightActive
-                        });
-                    }
+                    // Removed for production
                     
                     // Debug: Show active controls
-                    if (me.gamepad.throttle > 0.2 || me.gamepad.brake > 0.2 || Math.abs(me.gamepad.steering) > 0.2) {
-                        console.log('Active controls:', {
-                            forward: me.gamepad.throttle > 0.2,
-                            backward: me.gamepad.brake > 0.2,
-                            left: me.gamepad.steering < -0.2,
-                            right: me.gamepad.steering > 0.2,
-                            throttle: me.gamepad.throttle,
-                            brake: me.gamepad.brake,
-                            steering: me.gamepad.steering
-                        });
-                        
-                        // Show visual indicator
-                        me.showControllerInputs(me.gamepad.throttle, me.gamepad.brake, me.gamepad.steering);
-                    } else {
-                        me.hideControllerInputs();
-                    }
+                    // Removed for production
                 }
                 
                 requestAnimationFrame(poll);
@@ -175,6 +153,8 @@
                     connected: false,
                     controller: null,
                     steering: 0,
+                    cameraHorizontal: 0,
+                    cameraVertical: 0,
                     throttle: 0,
                     brake: 0
                 };
@@ -190,6 +170,14 @@
                 .name('Steering')
                 .listen();
             
+            folder.add(me.gamepad, 'cameraHorizontal', -1, 1)
+                .name('Camera Horizontal')
+                .listen();
+            
+            folder.add(me.gamepad, 'cameraVertical', -1, 1)
+                .name('Camera Vertical')
+                .listen();
+            
             folder.add(me.gamepad, 'throttle', 0, 1)
                 .name('Throttle (R2)')
                 .listen();
@@ -197,73 +185,6 @@
             folder.add(me.gamepad, 'brake', 0, 1)
                 .name('Brake (L2)')
                 .listen();
-        },
-
-        showControllerStatus: function (message, connected) {
-            // Create or update status display
-            var statusDiv = document.getElementById('controller-status');
-            if (!statusDiv) {
-                statusDiv = document.createElement('div');
-                statusDiv.id = 'controller-status';
-                statusDiv.style.cssText = `
-                    position: fixed;
-                    top: 20px;
-                    right: 20px;
-                    padding: 10px 15px;
-                    border-radius: 5px;
-                    color: white;
-                    font-family: Arial, sans-serif;
-                    font-weight: bold;
-                    z-index: 1000;
-                    transition: opacity 0.5s;
-                `;
-                document.body.appendChild(statusDiv);
-            }
-            
-            statusDiv.textContent = message;
-            statusDiv.style.backgroundColor = connected ? '#4CAF50' : '#f44336';
-            statusDiv.style.opacity = '1';
-            
-            // Hide after 3 seconds
-            setTimeout(function() {
-                statusDiv.style.opacity = '0';
-            }, 3000);
-        },
-
-        showControllerInputs: function (throttle, brake, steering) {
-            var inputDiv = document.getElementById('controller-inputs');
-            if (!inputDiv) {
-                inputDiv = document.createElement('div');
-                inputDiv.id = 'controller-inputs';
-                inputDiv.style.cssText = `
-                    position: fixed;
-                    bottom: 20px;
-                    left: 20px;
-                    padding: 15px;
-                    border-radius: 8px;
-                    background: rgba(0, 0, 0, 0.8);
-                    color: white;
-                    font-family: Arial, sans-serif;
-                    font-size: 14px;
-                    z-index: 1000;
-                `;
-                document.body.appendChild(inputDiv);
-            }
-            
-            inputDiv.innerHTML = `
-                <div style="margin-bottom: 5px;"><strong>Controller Inputs:</strong></div>
-                <div>Throttle (R2): ${(throttle * 100).toFixed(0)}%</div>
-                <div>Brake (L2): ${(brake * 100).toFixed(0)}%</div>
-                <div>Steering: ${(steering * 100).toFixed(0)}%</div>
-            `;
-            inputDiv.style.display = 'block';
-        },
-
-        hideControllerInputs: function () {
-            var inputDiv = document.getElementById('controller-inputs');
-            if (inputDiv) {
-                inputDiv.style.display = 'none';
-            }
         },
 
         onKeyDown: function () {
