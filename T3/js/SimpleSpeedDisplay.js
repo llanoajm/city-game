@@ -58,16 +58,28 @@ T3.SimpleSpeedDisplay = {
     updateDisplay: function() {
         var speedElement = document.getElementById('bike-speed-value');
         var statusElement = document.getElementById('bike-status');
+        var controlModeElement = document.getElementById('control-mode');
         
-        if (speedElement && statusElement) {
+        if (speedElement && statusElement && controlModeElement) {
             if (this.isConnected) {
                 speedElement.textContent = this.currentSpeed.toFixed(1);
                 statusElement.textContent = 'Connected';
                 statusElement.style.color = '#00ff00';
+                
+                // Show control mode based on speed
+                if (this.currentSpeed > 0.1) {
+                    controlModeElement.textContent = 'Bike Control';
+                    controlModeElement.style.color = '#00ff00';
+                } else {
+                    controlModeElement.textContent = 'Gamepad/Keyboard';
+                    controlModeElement.style.color = '#ffff00';
+                }
             } else {
                 speedElement.textContent = '--';
                 statusElement.textContent = 'Disconnected';
                 statusElement.style.color = '#ff0000';
+                controlModeElement.textContent = 'Gamepad/Keyboard';
+                controlModeElement.style.color = '#ffffff';
             }
         }
     },

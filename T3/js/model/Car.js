@@ -456,17 +456,39 @@
         // TILT (calculates the current tilt factor)
         me.tilt();
 
-        // MOVE FORWARD AND BACKWARD (keep original keyboard/gamepad controls)
-        if (T3.Keyboard.query('W')) {
-            me.move('forward', delta);
-        }
-        if (T3.Keyboard.query('S')) {
-            me.move('backward', delta);
-        }
+        // BIKE SPEED INTEGRATION - Use bike speed if available, otherwise gamepad/keyboard
+        var useBikeSpeed = T3.SimpleSpeedDisplay && T3.SimpleSpeedDisplay.isConnected && T3.SimpleSpeedDisplay.currentSpeed > 0.1;
+        
+        if (useBikeSpeed) {
+            // Convert bike speed (km/h) to game speed
+            var bikeSpeedKmh = T3.SimpleSpeedDisplay.currentSpeed;
+            var maxBikeSpeed = 30; // Expected max bike speed in km/h
+            var targetGameSpeed = (bikeSpeedKmh / maxBikeSpeed) * me.maxSpeed;
+            
+            // Smooth transition to target speed
+            var speedDiff = targetGameSpeed - me.speed;
+            me.speed += speedDiff * delta * 3; // Responsive but smooth
+            
+            // Apply speed limits
+            me.speed = Math.max(0, Math.min(me.maxSpeed, me.speed));
+            
+            // Move the car forward based on bike speed
+            if (me.speed > 1) {
+                me.move('forward', delta);
+            }
+        } else {
+            // Fallback to keyboard/gamepad controls (R2/L2 still work)
+            if (T3.Keyboard.query('W')) {
+                me.move('forward', delta);
+            }
+            if (T3.Keyboard.query('S')) {
+                me.move('backward', delta);
+            }
 
-        // SPEED AND WHEEL ROTATION DECAY
-        if ( !T3.Keyboard.query('W') && !T3.Keyboard.query('S') ) {
-            me.move('decay', delta);
+            // SPEED AND WHEEL ROTATION DECAY
+            if ( !T3.Keyboard.query('W') && !T3.Keyboard.query('S') ) {
+                me.move('decay', delta);
+            }
         }
         
         if ( !T3.Keyboard.query('A') && !T3.Keyboard.query('D') ) {
