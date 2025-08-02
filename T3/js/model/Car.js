@@ -261,6 +261,8 @@
             .onFinishChange(function (value) {
                 me.setVisible(value);
             });
+        // Set car mesh visible by default
+        me.setVisible(true);
         folder
             .add({shadow: false}, 'shadow')
             .name('Show shadows')
@@ -461,6 +463,23 @@
         }
         if (T3.Keyboard.query('S')) {
             me.move('backward', delta);
+        }
+        
+        // Debug: Log car input detection
+        if (T3.Keyboard.query('W') || T3.Keyboard.query('S') || T3.Keyboard.query('A') || T3.Keyboard.query('D')) {
+            console.log('Car detected inputs:', {
+                W: T3.Keyboard.query('W'),
+                S: T3.Keyboard.query('S'),
+                A: T3.Keyboard.query('A'),
+                D: T3.Keyboard.query('D'),
+                speed: me.speed,
+                keysArray: {
+                    W: T3.Keyboard.keys['W'.charCodeAt(0)],
+                    S: T3.Keyboard.keys['S'.charCodeAt(0)],
+                    A: T3.Keyboard.keys['A'.charCodeAt(0)],
+                    D: T3.Keyboard.keys['D'.charCodeAt(0)]
+                }
+            });
         }
 
         // SPEED AND WHEEL ROTATION DECAY

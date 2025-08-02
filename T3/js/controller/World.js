@@ -102,7 +102,8 @@
          */
         initCoordinates: function () {
             new T3.model.Coordinates({
-                ground: true
+                ground: true,
+                gridY: true // Show YZ grid by default
 //                gridX: true
             });
         },
@@ -465,6 +466,8 @@
                         me.visible = value;
                     });
             };
+            // Hide lamps by default
+            particleSystem.visible = false;
             T3.ObjectManager.add('lensflare', particleSystem);
         },
 
@@ -521,7 +524,7 @@
                 var folder = gui.addFolder('Wires');
 
                 folder
-                    .add({visible: true}, 'visible')
+                    .add({visible: false}, 'visible')
                     .name('Visible')
                     .onChange(function (value) {
                         var len = wires.length;
@@ -529,6 +532,11 @@
                             wires[len].visible = value;
                         }
                     });
+                // Hide wires by default
+                var len = wires.length;
+                while (len--) {
+                    wires[len].visible = false;
+                }
             }
 
             // gather all lamp positions

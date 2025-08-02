@@ -82,17 +82,17 @@ T3.Application = {
         // instantiate the scene (global)
         window.scene = new THREE.Scene();
         window.scene.fog = new THREE.Fog( 0x808080, 300, 1500);
-        window.scene.fog.visible = true;
+        window.scene.fog.visible = false; // Disable fog by default
         return this;
     },
 
     toggleFogStatus: function () {
         if (scene.fog.visible) {
-            scene.fog.near = 300;
-            scene.fog.far = 1500;
-        } else {
             scene.fog.near = Infinity;
             scene.fog.far = Infinity;
+        } else {
+            scene.fog.near = 300;
+            scene.fog.far = 1500;
         }
         return this;
     },
@@ -232,6 +232,10 @@ T3.Application = {
             .add(scene.fog, 'visible')
             .name('Fog visibility')
             .onFinishChange(this.toggleFogStatus);
+        
+        // Initialize PlayStation controller GUI
+        T3.Keyboard.initGamepadGUI(gui);
+        
         return this;
     },
 
