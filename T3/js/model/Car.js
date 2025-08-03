@@ -129,6 +129,12 @@
          */
         this.histogramSize = 10;
 
+        /**
+         * Backend speed tracking
+         */
+        this.lastSpeedSent = 0;
+        this.speedSendInterval = 3000; // 3 seconds like speed_sender.py
+
         Car.prototype.init.call(this, config);
     };
 
@@ -433,6 +439,37 @@
     };
 
     /**
+     * Send car speed to backend (like speed_sender.py)
+     */
+    Car.prototype.sendSpeedToBackend = function () {
+        var me = this;
+        var now = Date.now();
+        
+        // Only send every 3 seconds
+        if (now - me.lastSpeedSent > me.speedSendInterval) {
+            // Convert game speed to km/h (approximate)
+            var speedKmh = Math.abs(me.speed * 2); // Simple conversion factor
+            
+            fetch('http://localhost:5019/speed_update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ speed: speedKmh })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('✅ Speed sent:', speedKmh.toFixed(1), 'km/h');
+            })
+            .catch(error => {
+                console.log('❌ Backend not available:', error.message);
+            });
+            
+            me.lastSpeedSent = now;
+        }
+    };
+
+    /**
      * Listens to the events that happen in the world an updates this model
      * and the view, also this method is responsible to update the cube camera
      * used to compute the reflection texture applied to the body of this car
@@ -465,17 +502,18 @@
             var maxBikeSpeed = 30; // Expected max bike speed in km/h
             var targetGameSpeed = (bikeSpeedKmh / maxBikeSpeed) * me.maxSpeed;
             
-            // Smooth transition to target speed
-            var speedDiff = targetGameSpeed - me.speed;
-            me.speed += speedDiff * delta * 3; // Responsive but smooth
-            
-            // Apply speed limits
-            me.speed = Math.max(0, Math.min(me.maxSpeed, me.speed));
-            
-            // Move the car forward based on bike speed
-            if (me.speed > 1) {
+            // Use proper car physics for better momentum
+            if (targetGameSpeed > me.speed) {
+                // Accelerate to match bike speed
                 me.move('forward', delta);
+            } else if (bikeSpeedKmh < 0.5) {
+                // Natural deceleration when bike stops (maintains momentum)
+                me.move('decay', delta);
+            } else if (targetGameSpeed < me.speed * 0.7) {
+                // Only decelerate if bike speed drops significantly
+                me.move('decay', delta);
             }
+            // Otherwise maintain current speed (coasting)
         } else {
             // Fallback to keyboard/gamepad controls (R2/L2 still work)
             if (T3.Keyboard.query('W')) {
@@ -495,6 +533,9 @@
             me.wheelFrontLeft.decay();
             me.wheelFrontRight.decay();
         }
+
+        // SEND SPEED TO BACKEND (every 3 seconds)
+        me.sendSpeedToBackend();
 
         // CAR BACK LIGHTS
         me.lightsBack.update(delta, T3.Keyboard.query('S'));
